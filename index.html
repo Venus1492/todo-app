@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My to-do List</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      font-family: 'Courier New', Courier, monospace;
+      background-color: black;
+
+    }
+
+    h1 {
+      font-family: monospace;
+      color: grey;
+      font-size: 18px;
+      text-decoration: underline;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: min(90vw, 30rem);
+
+    }
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      padding-left: 2%;
+      padding-right: 2%;
+      --line: 2rem;
+      line-height: var(--line);
+      background-color: #fffef5;
+      background-image: repeating-linear-gradient(to bottom,
+          transparent 0,
+          transparent calc(var(--line) - 1px),
+          #bcd4e6 calc(var(--line) - 1px),
+          #bcd4e6 var(--line));
+    }
+
+    ul li {
+      display: flex;
+      justify-content: flex-start;
+      gap: 1rem;
+      text-wrap: wrap;
+      text-align: left;
+      min-height: var(--line);
+
+    }
+
+    ul li button {
+      margin-left: auto;
+      border: none;
+      line-height: 1;
+      color: #EB0F0F;
+      background-color: #fffef544;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .field {
+      position: relative;
+      /* the button is positioned inside this box */
+      display: block;
+      /* cancels your general "div" rule (flex column) */
+      width: auto;
+    }
+
+    .field input {
+      width: 100%;
+      box-sizing: border-box;
+      /* padding stays inside the 100% */
+      padding: 0.6rem 4.5rem 0.6rem 0.6rem;
+      /* extra right padding: text never runs under the button */
+    }
+
+    .addbtn {
+      position: absolute;
+      top: 50%;
+      right: 0.4rem;
+      transform: translateY(-50%);
+      margin: 0;
+      background-color: black;
+      border: none;
+      color: lightblue;
+    }
+
+
+    input {
+      border-radius: 5px;
+      border-collapse: collapse;
+      border: grey solid 1px;
+      padding: 2%;
+
+    }
+
+    li::before {
+      content: "\2022";
+
+    }
+
+    .done {
+      text-decoration: line-through;
+    }
+
+    ul li span {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+
+    <!--<h1>Get to it</h1>-->
+    <div class="field">
+      <input type="text" placeholder="I need to...">
+      <button class="addbtn">+</button>
+    </div>
+    <ul></ul>
+  </div>
+
+
+
+  <script>
+    const myInput = document.querySelector("input")
+    const addButton = document.querySelector("button")
+    const out = document.querySelector("ul")
+
+    const load = () => {
+      const saved = localStorage.getItem("list")
+      return saved ? JSON.parse(saved) : []
+    }
+
+    let list = load()
+
+    const save = () => {
+      localStorage.setItem("list", JSON.stringify(list))
+    }
+
+    const createTask = (task) => {
+      const li = document.createElement("li")
+      out.appendChild(li)
+
+      const span = document.createElement('span')
+      span.textContent = task.text
+      if (task.done) span.classList.add("done")
+      li.appendChild(span)
+
+      const deleteBtn = document.createElement("button")
+      deleteBtn.textContent = "x"
+      li.appendChild(deleteBtn)
+
+      span.addEventListener('click', () => {
+        task.done = !task.done
+        span.classList.toggle("done", task.done)
+        save()
+      })
+
+      deleteBtn.addEventListener('click', () => {
+        li.remove()
+        list = list.filter((t) => t.id !== task.id)
+        save()
+      })
+
+    }
+
+    const addTask = () => {
+      if (myInput.value.trim() === "") return
+
+      const task = {
+        id: Date.now(),
+        text: myInput.value,
+        done: false,
+      }
+
+      list.push(task)
+      createTask(task)
+      save()
+
+      myInput.value = ""
+    }
+
+    addButton.addEventListener('click', addTask)
+
+    myInput.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") addTask()
+    })
+
+    list.forEach(createTask)
+
+  </script>
+</body>
+
+</html>
